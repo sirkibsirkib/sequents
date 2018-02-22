@@ -48,8 +48,8 @@ impl Formula {
 	}
 
 	fn need_parens(my_type: FormulaType, their_type: FormulaType) -> bool {
-		if my_type == their_type {
-			return false;
+		if my_type == their_type{
+			return my_type == FormulaType::Implication;
 		} else if their_type == FormulaType::None {
 			return false;
 		}
@@ -63,12 +63,12 @@ impl Formula {
 		use Formula::*;
 		match self {
 			&Letter(x) => 					{f.push_str(&format!("{}", (x + 'a' as u8) as char));},
-			&Negation(ref x) => 			{f.push('-'); x.repr(f, my_type);},
-			&Conjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('&'); y.repr(f, my_type);},
-			&Disjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('V'); y.repr(f, my_type);},
-			&MDiamond(ref x) => 			{f.push('<'); f.push('>'); x.repr(f, my_type);},
-			&MBox(ref x) => 				{f.push('['); f.push(']'); x.repr(f, my_type);},
-			&Implication(ref x, ref y) => 	{x.repr(f, my_type); f.push('-'); f.push('>'); y.repr(f, my_type);},
+			&Negation(ref x) => 			{f.push('¬'); x.repr(f, my_type);},
+			&Conjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('∧'); y.repr(f, my_type);},
+			&Disjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('∨'); y.repr(f, my_type);},
+			&MDiamond(ref x) => 			{f.push('◇'); x.repr(f, my_type);},
+			&MBox(ref x) => 				{f.push('□'); x.repr(f, my_type);},
+			&Implication(ref x, ref y) => 	{x.repr(f, my_type); f.push('→'); y.repr(f, my_type);},
 		};
 		if parens {f.push(')');}
     }
@@ -146,6 +146,23 @@ impl MetaImpl {
 	}
 }
 
+impl fmt::Debug for MetaImpl {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		let mut l = String::new();
+		for x in self.left.iter() {
+			if !l.is_empty() {l.push(',');}
+			l.push_str(&format!("{:?}", x));
+		}
+		let mut r = String::new();
+		for x in self.right.iter() {
+			if !r.is_empty() {r.push(',');}
+			r.push_str(&format!("{:?}", x));
+		}
+		write!(f, "{} ⇒ {}", &l, &r)
+    }
+	
+}
+
 // pub fn parse(text: &str) -> Option<Formula> {
 // 	use Formula::*;
 // 	for i in 0..text.len() {
@@ -166,10 +183,12 @@ mod tests {
 				Box::new(Letter(0)),
 				Box::new(MBox(Box::new(Letter(1)))),
 			)),
-			Box::new(Letter(1)),
+			Box::new(Implication(
+				Box::new(Letter(1)),
+				Box::new(MBox(Box::new(MDiamond(Box::new(Letter(2)))),))
+			)),
 		);
-		println!("{:?}", &x);
-		let x = preprocess(x);
-		println!("{:?}", &x);
+		let m = MetaImpl::new(vec![], vec![preprocess(x), Formula::Letter(0)]); 
+		println!("{:?}", &m);
     }
 }
