@@ -23,7 +23,7 @@ impl FormulaType {
 
 #[derive(Clone)]
 pub enum Formula {
-	Letter(u8),
+	Letter(char),
 	Negation(Box<Formula>),
 	Conjunction(Box<Formula>, Box<Formula>),
 	Disjunction(Box<Formula>, Box<Formula>),
@@ -62,7 +62,7 @@ impl Formula {
 		if parens {f.push('(');}
 		use Formula::*;
 		match self {
-			&Letter(x) => 					{f.push_str(&format!("{}", (x + 'a' as u8) as char));},
+			&Letter(x) => 					{f.push_str(&format!("{}", x));},
 			&Negation(ref x) => 			{f.push('¬'); x.repr(f, my_type);},
 			&Conjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('∧'); y.repr(f, my_type);},
 			&Disjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('∨'); y.repr(f, my_type);},
@@ -120,7 +120,7 @@ impl MetaImpl {
 	}
 	
 	pub fn validity(&self) -> Validity {
-		let mut lefts: Vec<u8> = vec![];
+		let mut lefts: Vec<char> = vec![];
 		for l in self.left.iter() {
 			if let &Formula::Letter(x) = l {
 				lefts.push(x);
@@ -137,12 +137,73 @@ impl MetaImpl {
 		Validity::Indeterminate
 	}
 	
-	pub fn step(&mut self) -> Validity {
+	// Attempts to take one step. returns Some(x) when successful where x is the rule applied
+	pub fn step(&mut self) -> Option<u8> {
 		if self.validity() == Validity::Valid {
-			return Validity::Valid;
+			return None;
 		}
+		if self.try_rule_1() {return Some(1)};
+		if self.try_rule_2() {return Some(2)};
+		if self.try_rule_3() {return Some(3)};
+		if self.try_rule_4() {return Some(4)};
 		//TODO
-		Validity::Indeterminate
+		None
+	}
+
+	pub fn try_rule_1(&mut self) -> bool {
+		for i in 0..self.left.len() {
+			if let Formula::Negation(_) = self.left[i] {
+				let n = self.left.remove(i);
+				if let Formula::Negation(x) = n {
+					self.right.push(*x);
+				} else {panic!()}
+				return true;
+			}
+		}
+		false
+	}
+
+	pub fn try_rule_2(&mut self) -> bool {
+		for i in 0..self.right.len() {
+			if if let Formula::Negation(_) = self.right[i] {true} else {false} {
+				let n = self.right.remove(i);
+				if let Formula::Negation(x) = n {
+					self.left.push(*x);
+				} else {panic!()}
+				return true;
+			}
+		}
+		false
+	}
+
+	pub fn try_rule_3(&mut self) -> bool {
+		for i in 0..self.left.len() {
+			if let Formula::Conjunction(_,_) = self.left[i] {
+				let n = self.left.remove(i);
+				if let Formula::Conjunction(x, y) = n {
+					self.left.insert(i, *x);
+					self.left.insert(i+1, *y);
+				} else {panic!()}
+				return true;
+			}
+		}
+		false
+	}
+
+
+
+	pub fn try_rule_4(&mut self) -> bool {
+		for i in 0..self.right.len() {
+			if let Formula::Disjunction(_,_) = self.right[i] {
+				let n = self.right.remove(i);
+				if let Formula::Disjunction(x, y) = n {
+					self.right.insert(i, *x);
+					self.right.insert(i+1, *y);
+				} else {panic!()}
+				return true;
+			}
+		}
+		false
 	}
 }
 
@@ -178,17 +239,42 @@ mod tests {
     #[test]
     fn it_works() {
 		use Formula::*;
-		let x = Implication(
-			Box::new(Disjunction(
-				Box::new(Letter(0)),
-				Box::new(MBox(Box::new(Letter(1)))),
-			)),
-			Box::new(Implication(
-				Box::new(Letter(1)),
-				Box::new(MBox(Box::new(MDiamond(Box::new(Letter(2)))),))
-			)),
-		);
-		let m = MetaImpl::new(vec![], vec![preprocess(x), Formula::Letter(0)]); 
-		println!("{:?}", &m);
+
+		let mut m = MetaImpl::new(
+			vec![],
+			vec![
+				Negation(Box::new(
+					Conjunction(
+						Box::new(Negation(Box::new(Letter('p')))),
+						Box::new(Negation(Box::new(Letter('r')))),
+					),
+				)),
+				Disjunction(
+					Box::new(Letter('r')),
+					Box::new(Letter('p')),
+				),
+				Negation(Box::new(Letter('q'))),
+			],
+		); 
+		println!("starting with: {:?}", &m);
+		let mut step = Some(99);
+		while let Some(_) = step {
+			step = m.step();
+			println!("{:?}\t{:?}", &step, &m);
+		}
     }
 }
+
+
+
+
+// let x = Implication(
+// 	Box::new(Disjunction(
+// 		Box::new(Letter(0)),
+// 		Box::new(MBox(Box::new(Letter(1)))),
+// 	)),
+// 	Box::new(Implication(
+// 		Box::new(Letter(1)),
+// 		Box::new(MBox(Box::new(MDiamond(Box::new(Letter(2)))),))
+// 	)),
+// );
