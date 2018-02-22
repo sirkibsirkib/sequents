@@ -4,5 +4,6 @@ A, φ ∧ ψ ⇒ B if and only if A, φ, ψ ⇒ B
 A ⇒ φ ∧ ψ, B if and only if both A ⇒ φ, B and A ⇒ ψ, B
 A, φ ∨ ψ ⇒ B if and only if both A, φ ⇒ B and A, ψ ⇒ B
 A ⇒ φ ∨ ψ, B if and only if A ⇒ φ, ψ, B
+p1, . . . , pn, ♦φ1, . . . , ♦φm ⇒ q1, . . . , qk , ♦ψ1, . . . , ♦ψk
 
 p, q1, . . . , qn ⇒ p,r1, . . . ,rm is valid

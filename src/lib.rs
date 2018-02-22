@@ -138,16 +138,24 @@ impl MetaImpl {
 	}
 	
 	// Attempts to take one step. returns Some(x) when successful where x is the rule applied
-	pub fn step(&mut self) -> Option<u8> {
+	pub fn step(mut self) -> (Option<u8>, Vec<MetaImpl>) {
 		if self.validity() == Validity::Valid {
-			return None;
+			return (None, vec![]);
 		}
-		if self.try_rule_1() {return Some(1)};
-		if self.try_rule_2() {return Some(2)};
-		if self.try_rule_3() {return Some(3)};
-		if self.try_rule_4() {return Some(4)};
-		//TODO
-		None
+		if self.try_rule_1() {return (Some(1), vec![self])};
+		if self.try_rule_2() {return (Some(2), vec![self])};
+		if self.try_rule_3() {return (Some(3), vec![self])};
+		if self.try_rule_4() {return (Some(4), vec![self])};
+		if let Some((a, b)) = self.try_rule_5() {
+			return (Some(5), vec![a, b]);
+		}
+
+		//TODO rules 5, 6
+		let r7 = self.rule_diamond();
+		if !r7.is_empty() {
+			return (Some(7), r7);
+		}
+		(None, vec![])
 	}
 
 	pub fn try_rule_1(&mut self) -> bool {
@@ -205,6 +213,43 @@ impl MetaImpl {
 		}
 		false
 	}
+
+	pub fn try_rule_5(&mut self) -> Option<(MetaImpl, MetaImpl)> {
+		for i in 0..self.left.len() {
+			if let Some(&Formula::Disjunction(ref x, ref y)) = self.left.get(i) {
+				let mut lhs = (0..i).chain(i+1..self.left.len())
+				.map(|x| self.left.get(x).unwrap().clone())
+				.collect::<Vec<_>>();
+				return Some((
+					MetaImpl::new({let mut l = lhs.clone(); l.push((**x).clone()); l}, self.right.clone()),
+					MetaImpl::new({let mut l = lhs.clone(); l.push((**y).clone()); l}, self.right.clone()),
+				));
+			}
+		}
+		None
+	}
+
+	pub fn rule_diamond(&mut self) -> Vec<MetaImpl> {
+		let mut vec = vec![];
+		let rhs: Vec<Formula> = self.right.iter()
+		.map(|x| if let &Formula::MDiamond(ref q) = x {Some((**q).clone())} else {None})
+		.filter(|x| x.is_some())
+		.map(|x| x.unwrap())
+		.collect::<Vec<_>>();
+		if rhs.is_empty() {
+			return vec;
+		}
+		for l in self.left.iter() {
+			if let &Formula::MDiamond(ref inner) = l {
+				let x: Formula = (**inner).clone();
+				vec.push(MetaImpl::new(
+					vec![x],
+					rhs.clone(),
+				))
+			}
+		}
+		vec
+	}
 }
 
 impl fmt::Debug for MetaImpl {
@@ -240,7 +285,7 @@ mod tests {
     fn it_works() {
 		use Formula::*;
 
-		let mut m = MetaImpl::new(
+		let m = MetaImpl::new(
 			vec![],
 			vec![
 				Negation(Box::new(
@@ -253,14 +298,38 @@ mod tests {
 					Box::new(Letter('r')),
 					Box::new(Letter('p')),
 				),
-				Negation(Box::new(Letter('q'))),
+				MDiamond(
+					Box::new(Disjunction(
+						Box::new(Letter('r')),
+						Box::new(Letter('p')),
+					)),
+				),
+				Negation(Box::new(Disjunction(Box::new(Letter('q')), Box::new(Letter('s'))))),
+				Negation(Box::new(MDiamond(Box::new(Letter('p'))))),
+				Negation(Box::new(MDiamond(Box::new(Letter('q'))))),
 			],
 		); 
-		println!("starting with: {:?}", &m);
-		let mut step = Some(99);
-		while let Some(_) = step {
-			step = m.step();
-			println!("{:?}\t{:?}", &step, &m);
+		println!("starting with: {:?}...\n", &m);
+		let mut fs = vec![m];
+		let mut next = vec![];
+
+		while !fs.is_empty() {
+			while let Some(m) = fs.pop() {
+				let (n, v) = m.step();
+				next.extend(v);
+
+				if let Some(rule) = n {
+					print!("rule {:?}:", rule);
+				} else {
+					print!("       ");
+				}
+				for f in fs.iter().chain(next.iter()) {
+					print!("   \t{:?}", f);	
+				}
+				println!();
+			}
+			//println!("{:?}, {:?}", &n, &v);
+			fs.extend(next.drain(..));
 		}
     }
 }
