@@ -111,6 +111,14 @@ pub enum Validity {
 	Invalid,
 }
 
+pub enum StepResult {
+	Indeterminate(u8, MetaImpl),
+	ValidIfAny(u8, Vec<MetaImpl>),
+	ValidIfBoth(u8, MetaImpl, MetaImpl),
+	Valid(MetaImpl),
+	Invalid(MetaImpl),
+}
+
 impl MetaImpl {
 	pub fn new(left: Vec<Formula>, right: Vec<Formula>) -> MetaImpl {
 		MetaImpl {
@@ -138,24 +146,25 @@ impl MetaImpl {
 	}
 	
 	// Attempts to take one step. returns Some(x) when successful where x is the rule applied
-	pub fn step(mut self) -> (Option<u8>, Vec<MetaImpl>) {
+	pub fn step(mut self) -> StepResult {
+		use StepResult::*;
 		if self.validity() == Validity::Valid {
-			return (None, vec![]);
+			return Valid(self);
 		}
-		if self.try_rule_1() {return (Some(1), vec![self])};
-		if self.try_rule_2() {return (Some(2), vec![self])};
-		if self.try_rule_3() {return (Some(3), vec![self])};
-		if self.try_rule_4() {return (Some(4), vec![self])};
+		if self.try_rule_1() {return Indeterminate(1, self);}
+		if self.try_rule_2() {return Indeterminate(2, self);}
+		if self.try_rule_3() {return Indeterminate(3, self);}
+		if self.try_rule_4() {return Indeterminate(4, self);}
 		if let Some((a, b)) = self.try_rule_5() {
-			return (Some(5), vec![a, b]);
+			return ValidIfBoth(5, a, b);
 		}
 
 		//TODO rules 5, 6
 		let r7 = self.rule_diamond();
 		if !r7.is_empty() {
-			return (Some(7), r7);
+			return ValidIfAny(7, r7);
 		}
-		(None, vec![])
+		Invalid(self)
 	}
 
 	pub fn try_rule_1(&mut self) -> bool {
@@ -278,6 +287,94 @@ impl fmt::Debug for MetaImpl {
 // 	}
 // }
 
+
+pub struct Proof {
+	steps: Vec<String>,
+	proof_result: ProofResult, 
+	valid: bool,
+}
+
+pub enum ProofResult {
+	Valid,
+	Invalid,
+	AnyValid(Vec<Proof>),
+	BothValid(Box<Proof>, Box<Proof>),
+}
+
+
+impl Proof {
+	pub fn new(mut m: MetaImpl) -> Proof {
+		let mut steps = vec![format!("• prove: {:?}", &m)];
+		loop {
+			use StepResult::*;
+			match m.step() {
+				Indeterminate(r, a) => {
+					steps.push(format!("  rule {}: {:?}", r, &a));
+					m = a;
+				},
+				Valid(a) => {
+					steps.push(format!("  valid!"));
+					return Proof {
+						steps: steps,
+						proof_result: ProofResult::Valid,
+						valid: true,
+					}
+				},
+				Invalid(a) => {
+					steps.push(format!("  invalid!"));
+					return Proof {
+						steps: steps,
+						proof_result: ProofResult::Invalid,
+						valid: false,
+					}
+				},
+				ValidIfAny(r, v) => {
+					let proofs = v.into_iter().map(|x| Proof::new(x)).collect::<Vec<_>>();
+					let valid = proofs.iter().fold(false, |a,b| a||b.valid);
+					steps.push(format!("  valid if any... ({})", if valid {"valid"} else {"invalid"}));
+					return Proof {
+						steps: steps,
+						proof_result: ProofResult::AnyValid(proofs),
+						valid: valid,
+					}
+				},
+				ValidIfBoth(_, a, b) => {
+					let a = Box::new(Proof::new(a));
+					let b = Box::new(Proof::new(b));
+					let valid = a.valid || b.valid;
+					steps.push(format!("  valid if both... ({})", if valid {"valid"} else {"invalid"}));
+					return Proof {
+						steps: steps,
+						proof_result: ProofResult::BothValid(a, b),
+						valid: valid,
+					}
+				},
+			}
+		}
+	}
+
+	pub fn print(&self, depth: u8) {
+		for s in self.steps.iter() {
+			for _ in 0..depth {print!("    ")}
+			println!("{}", &s)
+		}
+		use ProofResult::*;
+		match self.proof_result {
+			Valid => (),
+			Invalid => (),
+			AnyValid(ref v) => {
+				for q in v.iter() {
+					q.print(depth+1);
+				}
+			},
+			BothValid(ref a, ref b) => {
+				a.print(depth+1);
+				b.print(depth+1);
+			},
+		} 
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -309,28 +406,9 @@ mod tests {
 				Negation(Box::new(MDiamond(Box::new(Letter('q'))))),
 			],
 		); 
-		println!("starting with: {:?}...\n", &m);
-		let mut fs = vec![m];
-		let mut next = vec![];
-
-		while !fs.is_empty() {
-			while let Some(m) = fs.pop() {
-				let (n, v) = m.step();
-				next.extend(v);
-
-				if let Some(rule) = n {
-					print!("rule {:?}:", rule);
-				} else {
-					print!("       ");
-				}
-				for f in fs.iter().chain(next.iter()) {
-					print!("   \t{:?}", f);	
-				}
-				println!();
-			}
-			//println!("{:?}, {:?}", &n, &v);
-			fs.extend(next.drain(..));
-		}
+		println!("starting with: {:?}...", &m);
+		let p = Proof::new(m);
+		p.print(0);
     }
 }
 
