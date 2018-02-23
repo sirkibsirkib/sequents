@@ -1,6 +1,8 @@
 
 use std::fmt;
 
+use super::UNICODE_MODE;
+
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum FormulaType {
 	Letter, Negation, Conjunction, Disjunction,
@@ -59,19 +61,38 @@ impl Formula {
 		their_type.bind_strength() > my_type.bind_strength()
 	}
 
-    fn repr(&self, f: &mut String, inside_type: FormulaType) {
+
+
+    fn repr_ascii(&self, f: &mut String, inside_type: FormulaType) {
     	let my_type = self.get_type();
 		let parens = Formula::need_parens(my_type, inside_type);
 		if parens {f.push('(');}
 		use Formula::*;
 		match self {
 			&Letter(x) => 					{f.push_str(&format!("{}", x));},
-			&Negation(ref x) => 			{f.push('¬'); x.repr(f, my_type);},
-			&Conjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('∧'); y.repr(f, my_type);},
-			&Disjunction(ref x, ref y) => 	{x.repr(f, my_type); f.push('∨'); y.repr(f, my_type);},
-			&MDiamond(ref x) => 			{f.push('◇'); x.repr(f, my_type);},
-			&MBox(ref x) => 				{f.push('□'); x.repr(f, my_type);},
-			&Implication(ref x, ref y) => 	{x.repr(f, my_type); f.push('→'); y.repr(f, my_type);},
+			&Negation(ref x) => 			{f.push('-'); x.repr_ascii(f, my_type);},
+			&Conjunction(ref x, ref y) => 	{x.repr_ascii(f, my_type); f.push('&'); y.repr_ascii(f, my_type);},
+			&Disjunction(ref x, ref y) => 	{x.repr_ascii(f, my_type); f.push('V'); y.repr_ascii(f, my_type);},
+			&MDiamond(ref x) => 			{f.push_str("<>"); x.repr_ascii(f, my_type);},
+			&MBox(ref x) => 				{f.push_str("[]"); x.repr_ascii(f, my_type);},
+			&Implication(ref x, ref y) => 	{x.repr_ascii(f, my_type); f.push_str("->"); y.repr_ascii(f, my_type);},
+		};
+		if parens {f.push(')');}
+    }
+
+    fn repr_unicode(&self, f: &mut String, inside_type: FormulaType) {
+    	let my_type = self.get_type();
+		let parens = Formula::need_parens(my_type, inside_type);
+		if parens {f.push('(');}
+		use Formula::*;
+		match self {
+			&Letter(x) => 					{f.push_str(&format!("{}", x));},
+			&Negation(ref x) => 			{f.push('¬'); x.repr_unicode(f, my_type);},
+			&Conjunction(ref x, ref y) => 	{x.repr_unicode(f, my_type); f.push('∧'); y.repr_unicode(f, my_type);},
+			&Disjunction(ref x, ref y) => 	{x.repr_unicode(f, my_type); f.push('∨'); y.repr_unicode(f, my_type);},
+			&MDiamond(ref x) => 			{f.push('◇'); x.repr_unicode(f, my_type);},
+			&MBox(ref x) => 				{f.push('□'); x.repr_unicode(f, my_type);},
+			&Implication(ref x, ref y) => 	{x.repr_unicode(f, my_type); f.push('→'); y.repr_unicode(f, my_type);},
 		};
 		if parens {f.push(')');}
     }
@@ -80,7 +101,11 @@ impl Formula {
 impl fmt::Debug for Formula {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		let mut s = String::new();
-		self.repr(&mut s, FormulaType::None);
+		if unsafe{UNICODE_MODE} {
+    		self.repr_unicode(&mut s, FormulaType::None);
+    	} else {
+    		self.repr_ascii(&mut s, FormulaType::None);
+    	}
 		write!(f, "{}", &s)
     }
 }

@@ -1,5 +1,6 @@
 use std::fmt;
 use ::formulae::*;
+use super::UNICODE_MODE;
 
 pub enum StepResult {
 	Indeterminate(u8, Sequent),
@@ -14,8 +15,6 @@ pub struct Sequent {
 	right: Vec<Formula>,
 }
 
-
-
 impl fmt::Debug for Sequent {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		let mut l = String::new();
@@ -28,9 +27,8 @@ impl fmt::Debug for Sequent {
 			if !r.is_empty() {r.push(',');}
 			r.push_str(&format!("{:?}", x));
 		}
-		write!(f, "{}  ⇒  {}", &l, &r)
+		write!(f, "{}  {}  {}", &l, if unsafe{UNICODE_MODE} {"⇒"} else {"=>"}, &r)
     }
-	
 }
 
 

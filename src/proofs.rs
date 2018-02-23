@@ -17,7 +17,7 @@ pub enum ProofResult {
 
 impl Proof {
 	pub fn new(mut m: Sequent) -> Proof {
-		let mut steps = vec![format!("• prove : {:?}", &m)];
+		let mut steps = vec![format!("* Prove : {:?}", &m)];
 		loop {
 			use self::StepResult::*;
 			match m.step() {

@@ -5,6 +5,9 @@ mod formulae;
 mod sequents;
 mod proofs;
 
+
+static mut UNICODE_MODE: bool = false;  
+
 use parsing::parse;
 use formulae::Formula;
 use sequents::{Sequent, StepResult};
@@ -50,6 +53,9 @@ fn input() -> Option<Formula> {
 }
 
 fn main() {
+	unsafe {
+		UNICODE_MODE = true;
+	}
 	if let Some(y) = input() {
 		println!("Given: {:?}", &y);
 		let x = preprocess(y.clone());
