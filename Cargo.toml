@@ -2,5 +2,3 @@
 name = "sequents"
 version = "0.1.0"
 authors = ["sirkibsirkib <christopher.esterhuyse@gmail.com>"]
-
-[dependencies]
