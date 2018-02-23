@@ -47,15 +47,22 @@ fn clean(s: String) -> String {
 }
 
 fn input() -> Option<Formula> {
-	let mut args: String = env::args().skip(1).collect();
+	let mut args = String::new();
+	for a in env::args().skip(1) {
+		if a == "--unicode" {
+			unsafe {
+				UNICODE_MODE = true;
+			}
+		} else {
+			args.push_str(&a);
+		}
+	}
 	args = clean(args);
 	parse(&mut args)
 }
 
 fn main() {
-	unsafe {
-		UNICODE_MODE = true;
-	}
+	
 	if let Some(y) = input() {
 		println!("Given: {:?}", &y);
 		let x = preprocess(y.clone());
