@@ -384,13 +384,16 @@ impl Proof {
 				b.print(depth+1);
 			},
 		} 
+		if depth == 0 {
+			println!("{}", if self.valid {"VALID"} else {"INVALID"});
+		}
 	}
 }
 
-fn strip_redundant_brackets(s: &mut String) -> bool {
+fn has_redundant_brackets(s: &str) -> bool {
 	if s.len() < 2
-	|| s.chars().next().unwrap() != '('
-	|| s.chars().last().unwrap() != ')' {
+	|| !s.starts_with('(')
+	|| !s.ends_with(')') {
 		return false;
 	}
 	let mut depth = 1;
@@ -406,13 +409,14 @@ fn strip_redundant_brackets(s: &mut String) -> bool {
 			_ => (),
 		}
 	}
-	*s = s[1..s.len()-1].to_owned();
 	true
 }
 
-fn parse(s: &mut String) -> Option<Formula> {
+fn parse(mut s: &str) -> Option<Formula> {
+	while has_redundant_brackets(s) {
+		s = &s[1..s.len()-1];
+	}
 	use Formula::*;
-	while strip_redundant_brackets(s) {}
 	if s.len() == 1 {
 		if let Some(c) = s.chars().next() {
 			if c.is_alphabetic() {
@@ -424,7 +428,7 @@ fn parse(s: &mut String) -> Option<Formula> {
 	let mut depth = 0;
 	let mut best = FormulaType::None;
 	let mut best_index = 1337;
-	for (i, c) in s.chars().enumerate() {
+	for (i, c) in s.char_indices() {
 		if depth > 0 {
 			match c {
 				'(' => depth += 1,
@@ -478,34 +482,34 @@ fn parse(s: &mut String) -> Option<Formula> {
 	match best {
 		FormulaType::None => None,
 		FormulaType::Negation => {
-			parse(&mut s.chars().skip(1).collect())
+			parse(&s[best_index + '¬'.len_utf8()..])
 			.map(|x| Negation(Box::new(x)))
 		},
 		FormulaType::MDiamond => {
-			parse(&mut s.chars().skip(1).collect())
+			parse(&s[best_index + '◇'.len_utf8()..])
 			.map(|x| MDiamond(Box::new(x)))
 		},
 		FormulaType::MBox => {
-			parse(&mut s.chars().skip(1).collect())
+			parse(&s[best_index + '□'.len_utf8()..])
 			.map(|x| MBox(Box::new(x)))
 		},
 		FormulaType::Implication => {
-			let a = parse(&mut s.chars().take(best_index).collect());
-			let b = parse(&mut s.chars().skip(best_index+1).collect());
+			let a = parse(&s[..best_index]);
+			let b = parse(&s[best_index + '→'.len_utf8()..]);
 			if let (Some(x), Some(y)) = (a,b) {
 				Some(Implication(Box::new(x), Box::new(y)))
 			} else {None}
 		},
 		FormulaType::Conjunction => {
-			let a = parse(&mut s.chars().take(best_index).collect());
-			let b = parse(&mut s.chars().skip(best_index+1).collect());
+			let a = parse(&s[..best_index]);
+			let b = parse(&s[best_index + '∧'.len_utf8()..]);
 			if let (Some(x), Some(y)) = (a,b) {
 				Some(Conjunction(Box::new(x), Box::new(y)))
 			} else {None}
 		},
 		FormulaType::Disjunction => {
-			let a = parse(&mut s.chars().take(best_index).collect());
-			let b = parse(&mut s.chars().skip(best_index+1).collect());
+			let a = parse(&s[..best_index]);
+			let b = parse(&s[best_index + '∨'.len_utf8()..]);
 			if let (Some(x), Some(y)) = (a,b) {
 				Some(Disjunction(Box::new(x), Box::new(y)))
 			} else {None}
@@ -529,6 +533,10 @@ fn input() -> Option<Formula> {
 	.replace("[]", "□")
 	.replace(" ", "");
 	parse(&mut args)
+}
+
+fn change(x: &str) -> &str {
+	&x[1..5]
 }
 
 fn main() {
