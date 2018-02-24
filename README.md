@@ -85,3 +85,27 @@ starting with:   ⇒  ¬¬◇¬(p∧q)∨¬◇¬p∧¬◇¬q...
           valid!
 VALID
 ```
+
+## Counter-models
+
+In the event the input formula is invalid, a counter-model is also output. Below is an example of an execution output including such a counter-model.
+
+```
+Given: ◇p→◇◇⊤
+...preprocessed to: ¬◇p∨◇◇⊤
+starting with:   ⇒  ¬◇p∨◇◇⊤...
+* Prove:   ⇒  ¬◇p∨◇◇⊤
+  [r_or]   ⇒  ¬◇p,◇◇⊤
+  [rneg] ◇p  ⇒  ◇◇⊤
+  [diam] valid if any... (invalid)
+    * Prove: p  ⇒  ◇⊤
+      invalid!
+INVALID!
+Counter-example:
+Model:
+  worlds:     {1, 2}
+  access fn.: {(1, 2)}
+  valuations: {
+    p: {2}
+  }
+```
