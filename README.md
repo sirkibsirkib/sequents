@@ -24,7 +24,7 @@ The validator takes as input a single formula in 1OPML. This input can be in uni
 Internally, the validator's implementation represents logical formulae using unicode characters {→,⇒,¬,∧,∨,◇,□}. For ease-of-use and for compatibility for consoles that may not display these characters correctly, ascii mode is enabled by default. This means that all _outputs_ are given by their ascii representations, as shown in the following table.
 
 | Operator     | Unicode | ASCII | Also accepted ASCII |
-| :------------- | :------------- |
+| :--------- | :------- |:------- |:------- |
 |      | ⇒ | =>    |    |
 | implication   |→ | ->     |   |
 | box | □ | [] | |
@@ -37,7 +37,7 @@ Internally, the validator's implementation represents logical formulae using uni
 
 ## Rules
 
-To determine validity, the validator relies on the following rewrite rules. These indices are used in the output to make the process easier to follow. Knowing the rules is not at all necessary to use the solver.
+To determine validity, the validator relies on the following rewrite rules, which allow a sequent to be transformed and simplified from the form on the left to the form on the right. These indices are used in the output to make the process easier to follow. Knowing the rules is not at all necessary to use the solver.
 
 Name | Rule Left | Rule Right
  :------ | :------- | :-------
