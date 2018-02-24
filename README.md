@@ -39,17 +39,17 @@ Internally, the validator's implementation represents logical formulae using uni
 
 To determine validity, the validator relies on the following rewrite rules. These indices are used in the output to make the process easier to follow. Knowing the rules is not at all necessary to use the solver.
 
-| Name | Rule Left | Rule Right
-| :------ | :------- |
-|lneg| A, `¬φ` ⇒ B | A ⇒ `φ`, B |
-|rneg| A ⇒ `¬φ`, B | A, `φ` ⇒ B |
-|land| A, `φ∧ψ` ⇒ B | A, `φ, ψ` ⇒ B |
-|r_or| A ⇒ φ ∨ ψ, B | A ⇒ φ, ψ, B |
-|rand| A ⇒ `φ∧ψ`, B | A ⇒ `φ`, B and A ⇒ `ψ`, B |
-|l_or| A, `φ∨ψ` ⇒ B | A, `φ` ⇒ B and A, `ψ` ⇒ B |
-|diam| A,`◇φ1,...,◇φm` ⇒ B,◇ψ1,...,◇ψj | `φi` ⇒ B for some i ∈ [1,m] |
-|ltop| A, `⊤` ⇒ B | A ⇒ B |
-|rbot| A ⇒ `⊥`, B | A ⇒ B |
+Name | Rule Left | Rule Right
+ :------ | :-------
+lneg| A, `¬φ` ⇒ B | A ⇒ `φ`, B
+rneg| A ⇒ `¬φ`, B | A, `φ` ⇒ B
+land| A, `φ∧ψ` ⇒ B | A, `φ, ψ` ⇒ B
+r_or| A ⇒ φ ∨ ψ, B | A ⇒ φ, ψ, B
+rand| A ⇒ `φ∧ψ`, B | A ⇒ `φ`, B and A ⇒ `ψ`, B
+l_or| A, `φ∨ψ` ⇒ B | A, `φ` ⇒ B and A, `ψ` ⇒ B
+diam| A,`◇φ1,...,◇φm` ⇒ B,◇ψ1,...,◇ψj | `φi` ⇒ B for some i ∈ [1,m]
+ltop| A, `⊤` ⇒ B | A ⇒ B
+rbot| A ⇒ `⊥`, B | A ⇒ B
 
 ## Output
 
