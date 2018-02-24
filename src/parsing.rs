@@ -27,13 +27,13 @@ pub fn parse(mut s: &str) -> Option<Formula> {
 		s = &s[1..s.len()-1];
 	}
 	use Formula::*;
-	if s.len() == 1 {
-		if let Some(c) = s.chars().next() {
-			if c.is_alphabetic() {
-				return Some(Letter(c));
-			}
+	if s.chars().count() == 1 {
+		return match s.chars().next() {
+			Some('⊤') => Some(Top),
+			Some('⊥') => Some(Bottom),
+			Some(x) if x.is_lowercase() => Some(Letter(x)),
+			_ => None,
 		}
-		return None;
 	}
 	let mut depth = 0;
 	let mut best = FormulaType::None;
@@ -126,4 +126,21 @@ pub fn parse(mut s: &str) -> Option<Formula> {
 		},
 		_ => None,
 	}
+}
+
+pub fn to_unicode(s: String) -> String {
+	s
+	.replace("->", "→")
+	.replace("=>", "⇒")
+	.replace("-", "¬")
+	.replace("~", "¬")
+	.replace("/\\", "∧")
+	.replace("&", "∧")
+	.replace("V", "∨")
+	.replace("\\/", "∨")
+	.replace("<>", "◇")
+	.replace("[]", "□")
+	.replace(" ", "")
+	.replace("T", "⊤")
+	.replace("F", "⊥")
 }
