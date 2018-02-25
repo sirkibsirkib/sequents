@@ -29,8 +29,8 @@ pub fn parse(mut s: &str) -> Option<Formula> {
 	use Formula::*;
 	if s.chars().count() == 1 {
 		return match s.chars().next() {
-			Some('⊤') => Some(Top),
-			Some('⊥') => Some(Bottom),
+			Some('T') => Some(Top),
+			Some('F') => Some(Bottom),
 			Some(x) if x.is_lowercase() => Some(Letter(x)),
 			_ => None,
 		}
@@ -141,6 +141,6 @@ pub fn to_unicode(s: String) -> String {
 	.replace("<>", "◇")
 	.replace("[]", "□")
 	.replace(" ", "")
-	.replace("T", "⊤")
-	.replace("F", "⊥")
+	.replace("⊤", "T")
+	.replace("⊥", "F")
 }

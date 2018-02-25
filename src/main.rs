@@ -6,7 +6,7 @@ mod sequents;
 mod proofs;
 mod models;
 
-static mut UNICODE_MODE: bool = false;  
+static mut UNICODE_MODE: bool = false;
 
 use parsing::{to_unicode, parse};
 use formulae::Formula;
@@ -65,14 +65,12 @@ fn main() {
 		let m = Sequent::new(
 			vec![],
 			vec![x],
-		); 
+		);
 		println!("starting with: {:?}...", &m);
 		let p = Proof::new(m);
 		p.print(0);
 		if p.valid() {
-			//find satisfying model
-			println!("VALID!\nSatisfying");
-			//TODO
+			println!("VALID!");
 		} else {
 			//find counterexample
 			println!("INVALID!\nCounter-example:");
@@ -91,7 +89,7 @@ fn build_counter_model(curr_world: u32, proof: &Proof, next_avail_world: &mut u3
 	for letter in proof.true_here() {
 		builder.set_true_in(curr_world, *letter);
 	}
-	use proofs::ProofResult::*;		
+	use proofs::ProofResult::*;
 	match proof.proof_result() {
 		&Valid => (),
 		&Invalid => (),

@@ -97,8 +97,8 @@ impl Formula {
 		if parens {f.push('(');}
 		use Formula::*;
 		match self {
-			&Top =>							f.push('⊤'),
-			&Bottom =>						f.push('⊥'),
+			&Top =>							f.push('T'),
+			&Bottom =>						f.push('F'),
 			&Letter(x) => 					{f.push_str(&format!("{}", x));},
 			&Negation(ref x) => 			{f.push('¬'); x.repr_unicode(f, my_type);},
 			&Conjunction(ref x, ref y) => 	{x.repr_unicode(f, my_type); f.push('∧'); y.repr_unicode(f, my_type);},

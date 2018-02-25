@@ -8,29 +8,30 @@ The validator attempts to prove a given formula in 1OPML is _valid_ (ie. a tauto
 
 ## Setup
 
-As the validator is written in Rust, the binary must first be compiled on your machine. Follow these steps:
-1. If you don't have rust already, acquire it by using [rustup](https://www.rustup.rs), the Rust toolchain manager. Follow the default online prompts until both the Rust compiler and the Rust package manager, _cargo_, are installed. The standard 'stable' release version of Rust are sufficient.
+The validator must first be compiled from source on your machine to guarantee that it runs. First, you might consider trying your luck with one of the pre-compiled binaries provided in the `.../precompiled_binaries` directory. Failing that, follow these steps to compile it yourself:
+1. If you don't have `rustc` and `cargo` installed on your machine, acquire them by using [rustup](https://www.rustup.rs), the Rust toolchain manager. Follow the default prompts to install the default 'stable' release of Rust and Cargo.
 1. Clone this git repository to your local machine and navigate to it.
-1. Use `cargo build --release` to compile the binary with optimizations enabled.
-1. The binary will be found in `/target/release/` and will be called something like `sequents` or `sequents.exe`.
+1. Use `cargo build --release` to compile the binary with optimizations enabled into `.../target/release`. It will be named `sequents` (or `sequents.exe` on Windows).
 
 ## User Input
 
-The validator takes as input a single formula in 1OPML. This input can be in unicode, ascii or an arbitrary mix[1]. Multiple input arguments will be taken to be as part of the same formula (whitespace is ignored). However, the special input word `--unicode` is detected and escaped. This switches the program from the default ascii mode to unicode[1].
+The validator takes as input a single formula in 1OPML. This input can be in unicode, ascii or an arbitrary mix[1]. Beware of your shell parsing some of the ascii characters in unintended ways (Perhaps surround your formula with `""` as in `sequents "<>p->-[]pVq"`). Multiple input arguments will be taken to be as part of the same formula (whitespace is ignored). However, the special input word `--unicode` is detected and escaped. This switches the program from the default ascii mode to unicode[1].
+
 
 [1] See the section `Unicode or ASCII`
 
 ## Unicode or ASCII
 Internally, the validator's implementation represents logical formulae using unicode characters {→,⇒,¬,∧,∨,◇,□}. For ease-of-use and for compatibility for consoles that may not display these characters correctly, ascii mode is enabled by default. This means that all _outputs_ are given by their ascii representations, as shown in the following table.
 
-| Operator     | Unicode | ASCII | Also accepted ASCII |
+| Operator     | Unicode | ASCII | Also accepted input |
 | :--------- | :------- |:------- |:------- |
 |      | ⇒ | =>    |    |
 | implication   |→ | ->     |   |
 | box | □ | [] | |
-| top | ⊤ | T | |
-| bottom | ⊥ | F | |
+| top | T | T | ⊤ |
+| bottom | F | F | ⊥ |
 | diamond | ◇ | <> | |
+| variable | a-z | a-z | |
 | not   | ¬ | -     | ~  |
 | and   | ∧ | &     | /\ |
 | or    | ∨ | V     | \/ |
@@ -88,7 +89,7 @@ VALID
 
 ## Counter-models
 
-In the event the input formula is invalid, a counter-model is also output. Below is an example of an execution output including such a counter-model.
+In the event the input formula is invalid, a counter-model is also output. Below is an example of an execution output including such a counter-model. In these outputs, world `1` is always the world that invalidates the given formula.
 
 ```
 Given: ◇p→◇◇⊤
@@ -103,9 +104,9 @@ starting with:   ⇒  ¬◇p∨◇◇⊤...
 INVALID!
 Counter-example:
 Model:
-  worlds:     {1, 2}
-  access fn.: {(1, 2)}
-  valuations: {
+  worlds: {1, 2}
+  access fn: {(1, 2)}
+  value fn: {
     p: {2}
   }
 ```

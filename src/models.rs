@@ -9,7 +9,7 @@ pub struct Model {
 
 impl fmt::Debug for Model {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-    	let preamble = "Model:\n  worlds:     ";
+    	let preamble = "Model:\n  worlds: ";
     	match self.num_worlds {
     		1 => write!(f, "{}{{1}}\n", preamble),
     		2 => write!(f, "{}{{1, 2}}\n", preamble),
@@ -18,10 +18,10 @@ impl fmt::Debug for Model {
     		x => write!(f, "{}{{1, 2, ... {}}}\n", preamble, x),
     	}?;
     	if !self.accessibility_function.is_empty() {
-    		write!(f, "  access fn.: {:?}\n", &self.accessibility_function)?;
+    		write!(f, "  access fn: {:?}\n", &self.accessibility_function)?;
     	}
 		if !self.valuations.is_empty() {
-			write!(f, "  valuations: {{\n")?;
+			write!(f, "  value fn: {{\n")?;
 			for (k, v) in self.valuations.iter() {
 				write!(f, "    {}: {:?}", k, v)?;
 			}
@@ -29,7 +29,7 @@ impl fmt::Debug for Model {
 		}
 		Ok(())
     }
-	
+
 }
 
 #[derive(Debug)]
@@ -58,7 +58,7 @@ impl ModelBuilder {
 		self.m.num_worlds = self.m.num_worlds.max(world);
 		if !self.m.valuations.contains_key(&variable) {
 			self.m.valuations.insert(variable, HashSet::new());
-		} 
+		}
 		self.m.valuations.get_mut(&variable).unwrap().insert(world);
 	}
 
