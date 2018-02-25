@@ -38,7 +38,7 @@ Internally, the validator's implementation represents logical formulae using uni
 
 ## Rules
 
-To determine validity, the validator relies on the following rewrite rules, which allow a sequent to be transformed and simplified from the form on the left to the form on the right. These names are shown in the output to make the process easier to follow.
+To determine validity, the validator relies on the following rewrite rules, which allow a sequent to be transformed and simplified from the form on the left to the form on the right. These names are shown in the output to make the process easier to follow. 
 
 Name | Rule Left | Rule Right
  :------ | :------- | :-------
