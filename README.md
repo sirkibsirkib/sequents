@@ -59,32 +59,31 @@ After a preprocessing step to get rid of operators {→,□} a single `Proof` in
 Below is an example of an execution with the input formula `□(p∧q)→□p∧□q`, given in ascii as `[](p&q)->[]p&[]q`, using the optional `--unicode` flag to enable unicode-formatted output.
 
 ```
-λ .\sequents.exe --unicode "[](p&q)->[]p&[]q"
-Given: □(p∧q)→□p∧□q
-...preprocessed to: ¬¬◇¬(p∧q)∨¬◇¬p∧¬◇¬q
-starting with:   ⇒  ¬¬◇¬(p∧q)∨¬◇¬p∧¬◇¬q...
-* Prove :   ⇒  ¬¬◇¬(p∧q)∨¬◇¬p∧¬◇¬q
-  rule 4:   ⇒  ¬¬◇¬(p∧q),¬◇¬p∧¬◇¬q
-  rule 2: ¬◇¬(p∧q)  ⇒  ¬◇¬p∧¬◇¬q
-  rule 1:   ⇒  ¬◇¬p∧¬◇¬q,◇¬(p∧q)
-  rule 6: valid if both... (valid)
-    * Prove :   ⇒  ◇¬(p∧q),¬◇¬p
-      rule 2: ◇¬p  ⇒  ◇¬(p∧q)
-      rule 7: valid if any... (valid)
-        * Prove : ¬p  ⇒  ¬(p∧q)
-          rule 1:   ⇒  ¬(p∧q),p
-          rule 2: p∧q  ⇒  p
-          rule 3: p,q  ⇒  p
+Given: □(p∧q)→□p∧□p
+...preprocessed to: ¬¬◇¬(p∧q)∨(¬◇¬p∧¬◇¬p)
+starting with:   ⇒  ¬¬◇¬(p∧q)∨(¬◇¬p∧¬◇¬p)...
+* Prove:   ⇒  ¬¬◇¬(p∧q)∨(¬◇¬p∧¬◇¬p)
+  [r_or]   ⇒  ¬¬◇¬(p∧q),¬◇¬p∧¬◇¬p
+  [rneg] ¬◇¬(p∧q)  ⇒  ¬◇¬p∧¬◇¬p
+  [lneg]   ⇒  ¬◇¬p∧¬◇¬p,◇¬(p∧q)
+  [rand] valid if both... (valid)
+    * Prove:   ⇒  ◇¬(p∧q),¬◇¬p
+      [rneg] ◇¬p  ⇒  ◇¬(p∧q)
+      [diam] valid if any... (valid)
+        * Prove: ¬p  ⇒  ¬(p∧q)
+          [lneg]   ⇒  ¬(p∧q),p
+          [rneg] p∧q  ⇒  p
+          [land] p,q  ⇒  p
           valid!
-    * Prove :   ⇒  ◇¬(p∧q),¬◇¬q
-      rule 2: ◇¬q  ⇒  ◇¬(p∧q)
-      rule 7: valid if any... (valid)
-        * Prove : ¬q  ⇒  ¬(p∧q)
-          rule 1:   ⇒  ¬(p∧q),q
-          rule 2: p∧q  ⇒  q
-          rule 3: p,q  ⇒  q
+    * Prove:   ⇒  ◇¬(p∧q),¬◇¬p
+      [rneg] ◇¬p  ⇒  ◇¬(p∧q)
+      [diam] valid if any... (valid)
+        * Prove: ¬p  ⇒  ¬(p∧q)
+          [lneg]   ⇒  ¬(p∧q),p
+          [rneg] p∧q  ⇒  p
+          [land] p,q  ⇒  p
           valid!
-VALID
+VALID!
 ```
 
 ## Counter-models
