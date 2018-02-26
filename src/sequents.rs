@@ -53,6 +53,9 @@ impl Sequent {
 	}
 	
 	pub fn certainly_valid(&self) -> bool {
+		// if self.right.len() == 0 {
+		// 	return true;
+		// }
 		let mut lefts: Vec<char> = vec![];
 		for r in self.right.iter() {
 			if r == &Formula::Top {

@@ -94,24 +94,11 @@ fn build_counter_model(curr_world: u32, proof: &Proof, next_avail_world: &mut u3
 		&Valid => (),
 		&Invalid => (),
 		&AnyValid(ref proofs) => {
-			//pick the shallowest sub-proof that is valid!
-			let mut min_depth = 999999999;
-			let mut best = None;
-			for p in proofs.iter() { //.filter(|p| p.valid())
-				let m = p.min_depth();
-				if m < min_depth {
-					best = Some(p);
-					min_depth = m;
-				}
-			}
-			match best {
-				None => (), //done here! no successors?? TODO
-				Some(ref b) => {
-					let wid = *next_avail_world;
-					*next_avail_world += 1;
-					builder.add_access(curr_world, wid);
-					build_counter_model(wid, b, next_avail_world, builder);
-				},
+			for p in proofs.iter() {
+				let wid = *next_avail_world;
+				*next_avail_world += 1;
+				builder.add_access(curr_world, wid);
+				build_counter_model(wid, p, next_avail_world, builder);
 			}
 		},
 		&BothValid(ref a, ref b) => {
