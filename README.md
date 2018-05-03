@@ -4,7 +4,7 @@ This is a [sequent calculus](https://en.wikipedia.org/wiki/Sequent_calculus) val
 
 The validator attempts to prove a given formula in 1OPML is _valid_ (ie. a tautology). Such a formula might look something like: `□(p∧q)→□p∧□q`.
 
-1OPML (which adds the modal operators {◇, □}) also subsumes 1st order _prepositional logic_. So, formulae like this `p→(p∨q→p)∧¬p` work just fine.
+1OPML (which adds the modal operators {◇, □}) also subsumes _1st order propositional logic_. So, formulae like this `p→(p∨q→p)∧¬p` work just fine.
 
 ## Setup
 
